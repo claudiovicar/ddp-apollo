@@ -91,7 +91,7 @@ class DDPSubscriptionLink extends ApolloLink {
 
   request(operation = {}) {
     const clientContext = getClientContext(operation, this.clientContextKey);
-    const subHandler = this.connection.subscribe(this.publication, operation, clientContext);
+    let subHandler = this.connection.subscribe(this.publication, operation, clientContext);
     const subId = subHandler[this.subscriptionIdKey];
 
     return new Observable((observer) => {
@@ -100,6 +100,8 @@ class DDPSubscriptionLink extends ApolloLink {
       return () => {
         if (subHandler.stop) {
           subHandler.stop();
+          subHandler.remove();
+          subHandler = null;
         } else if (this.connection.unsubscribe) {
           this.connection.unsubscribe(subId);
         } else {
